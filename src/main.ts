@@ -1,10 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ApplicationConfig } from './config';
-import { VersioningType } from '@nestjs/common';
+import { INestApplication, VersioningType } from '@nestjs/common';
+
+export let app: INestApplication<any>;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  app = await NestFactory.create(AppModule);
 
   app.enableVersioning({
     type: VersioningType.URI,
