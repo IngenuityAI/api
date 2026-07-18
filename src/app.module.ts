@@ -7,11 +7,13 @@ import { UsersModule } from './routes/users/users.module';
 import { ChatsModule } from './routes/chats/chats.module';
 import { BullModule } from '@nestjs/bullmq';
 import { InferenceModule } from './modules/inference/inference.module';
+import { RedisModule } from './modules/redis/redis.module';
 
 @Module({
   imports: [
     PassportModule,
     InferenceModule,
+    RedisModule,
     BullModule.forRoot({
       connection: {
         host: 'localhost',

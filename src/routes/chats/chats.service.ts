@@ -29,6 +29,15 @@ export class ChatsService {
       },
     });
 
+    await prisma.message.create({
+      data: {
+        chatId: chat.id,
+        role: MessageRole.ASSISTANT,
+        content: '',
+        isGenerating: true,
+      },
+    });
+
     this._processChat(chat.id);
 
     return chat;
@@ -42,7 +51,9 @@ export class ChatsService {
         id: chatId,
       },
       include: {
-        messages: true,
+        messages: {
+          orderBy: { createdAt: 'asc' },
+        },
       },
     });
 
@@ -58,18 +69,17 @@ export class ChatsService {
         id: chatId,
       },
       include: {
-        messages: true,
+        messages: {
+          orderBy: { createdAt: 'asc' },
+        },
       },
     });
     if (!chat) throw new NotFoundException('Chat not found');
 
-    const lastMessage = chat.messages[chat.messages.length - 1];
-    if (lastMessage.role !== MessageRole.USER) return;
-
     const aiResponse = await this.inferenceService.chatCompletion(
       chat.messages,
       chat,
-      'lm-studio/qwen3.5-4b',
+      'lm-studio/llama-3.2-1b-instruct',
     );
 
     console.log(aiResponse);
