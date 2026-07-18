@@ -1,8 +1,8 @@
 import { Job, Queue } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
-import { Chat, Message } from 'generated/prisma';
 import { InferenceEvents } from './inference.events';
+import { Chat, Message } from '@ingenuityai/database';
 
 @Injectable()
 export class InferenceService {

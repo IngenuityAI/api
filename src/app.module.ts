@@ -4,7 +4,6 @@ import { JwtStrategy } from './auth/jwt.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwtAuth.guard';
 import { UsersModule } from './routes/users/users.module';
-import { PrismaModule } from './modules/prisma.module';
 import { ChatsModule } from './routes/chats/chats.module';
 import { BullModule } from '@nestjs/bullmq';
 import { InferenceModule } from './modules/inference/inference.module';
@@ -12,7 +11,6 @@ import { InferenceModule } from './modules/inference/inference.module';
 @Module({
   imports: [
     PassportModule,
-    PrismaModule,
     InferenceModule,
     BullModule.forRoot({
       connection: {

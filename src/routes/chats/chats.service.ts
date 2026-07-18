@@ -4,29 +4,24 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Chat, MessageRole, PrismaClient } from 'generated/prisma/client';
+import { Chat, MessageRole, prisma } from '@ingenuityai/database';
 import { IUser } from 'src/auth/user.decorator';
 import { InferenceService } from 'src/modules/inference/inference.service';
-import { Prisma } from 'src/modules/prisma.module';
 
 @Injectable()
 export class ChatsService {
-  constructor(
-    @Inject(Prisma)
-    private readonly prisma: PrismaClient,
-    private readonly inferenceService: InferenceService,
-  ) {}
+  constructor(private readonly inferenceService: InferenceService) {}
 
   async createChat(user: IUser, prompt: string) {
     if (!user) throw new UnauthorizedException('User not authenticated');
 
-    const chat = await this.prisma.chat.create({
+    const chat = await prisma.chat.create({
       data: {
         userId: user.id,
       },
     });
 
-    await this.prisma.message.create({
+    await prisma.message.create({
       data: {
         chatId: chat.id,
         role: MessageRole.USER,
@@ -42,7 +37,7 @@ export class ChatsService {
   async getChat(user: IUser, chatId: string) {
     if (!user) throw new UnauthorizedException('User not authenticated');
 
-    const chat = await this.prisma.chat.findUnique({
+    const chat = await prisma.chat.findUnique({
       where: {
         id: chatId,
       },
@@ -58,7 +53,7 @@ export class ChatsService {
   }
 
   private async _processChat(chatId: string) {
-    const chat = await this.prisma.chat.findUnique({
+    const chat = await prisma.chat.findUnique({
       where: {
         id: chatId,
       },
@@ -74,7 +69,7 @@ export class ChatsService {
     const aiResponse = await this.inferenceService.chatCompletion(
       chat.messages,
       chat,
-      'gemma3:4b',
+      'lm-studio/qwen3.5-4b',
     );
 
     console.log(aiResponse);

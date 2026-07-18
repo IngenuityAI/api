@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { User as UserModel } from 'generated/prisma';
+import { User as UserModel } from '@ingenuityai/database';
 import { IAuthenticatedUser } from './authenticatedUser.decorator';
 import { app } from 'src/main';
 import { UsersService } from 'src/routes/users/users.service';
