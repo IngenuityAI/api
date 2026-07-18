@@ -1,6 +1,12 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { MessageRole, PrismaClient } from 'generated/prisma/client';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { Chat, MessageRole, PrismaClient } from 'generated/prisma/client';
 import { IUser } from 'src/auth/user.decorator';
+import { InferenceService } from 'src/modules/inference/inference.service';
 import { Prisma } from 'src/modules/prisma.module';
 
 @Injectable()
@@ -8,6 +14,7 @@ export class ChatsService {
   constructor(
     @Inject(Prisma)
     private readonly prisma: PrismaClient,
+    private readonly inferenceService: InferenceService,
   ) {}
 
   async createChat(user: IUser, prompt: string) {
@@ -26,6 +33,8 @@ export class ChatsService {
         content: prompt,
       },
     });
+
+    this._processChat(chat.id);
 
     return chat;
   }
@@ -46,5 +55,28 @@ export class ChatsService {
       throw new UnauthorizedException('Chat not found or access denied');
 
     return chat;
+  }
+
+  private async _processChat(chatId: string) {
+    const chat = await this.prisma.chat.findUnique({
+      where: {
+        id: chatId,
+      },
+      include: {
+        messages: true,
+      },
+    });
+    if (!chat) throw new NotFoundException('Chat not found');
+
+    const lastMessage = chat.messages[chat.messages.length - 1];
+    if (lastMessage.role !== MessageRole.USER) return;
+
+    const aiResponse = await this.inferenceService.chatCompletion(
+      chat.messages,
+      chat,
+      'gemma3:4b',
+    );
+
+    console.log(aiResponse);
   }
 }
